@@ -115,6 +115,7 @@ for layer in model.layers:
 layerQuantizedData_7bits_scale1 = copy.deepcopy(layerFloatData)
 layerQuantizedData_5bits_scale1 = copy.deepcopy(layerFloatData)
 layerQuantizedData_7bits_scale5 = copy.deepcopy(layerFloatData)
+layerQuantizedData_4bits_scale1 = copy.deepcopy(layerFloatData)
 
 ##Qunatize loop 0-255
 ## Here is how layer data structure looks like
@@ -161,6 +162,10 @@ n_bits = 5
 organizedList_5bits = listQuantize(layerFloatData,layerQuantizedData_5bits_scale1,n_bits,1)
 layerQuantizedData_5bits = organizedList_5bits.quantizeListSimple2()
 
+n_bits = 4
+organizedList_4bits = listQuantize(layerFloatData,layerQuantizedData_4bits_scale1,n_bits,1)
+layerQuantizedData_4bits = organizedList_4bits.quantizeListSimple2()
+
 ## Let's fill even more zeros to assess the impact to results
 ## similar to layerQuantizedData[1][0][(layerQuantizedData[1][0] <= 5*resolutionForLayer) & (layerQuantizedData[1][0] >= -5*resolutionForLayer)] = 0
 n_bits = 7
@@ -204,6 +209,10 @@ assignLayerDataToModel(modelQuantized,layerQuantizedData_7bits_scale5)
 modelQuantized.evaluate(x_test,y_test)
 modelQuantized.evaluate(x_test_quantized,y_test)
 
+modelQuantized.set_weights(model.get_weights())
+assignLayerDataToModel(modelQuantized,layerQuantizedData_4bits_scale1)
+modelQuantized.evaluate(x_test,y_test)
+modelQuantized.evaluate(x_test_quantized,y_test)
 ##You can copy the weights from old model to the new model, layer by layer as well, if needed but using model.get_weights is way easier
 layerIndex = 0;
 for layer in model.layers:
